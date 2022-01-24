@@ -1,0 +1,10 @@
+target/*
+*.swp
+*.zip
+hsc/*
+mach_fast/*
+mach_full/*
+data/*
+.classpath
+.settings/*
+.project
