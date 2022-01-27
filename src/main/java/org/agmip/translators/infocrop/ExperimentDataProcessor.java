@@ -73,13 +73,15 @@ public class ExperimentDataProcessor
                     // crid = (String) MapUtil.getObjectOr(events,"crid","");
                     StringBuffer irrigationList = new StringBuffer();
                     StringBuffer fertilizerList = new StringBuffer();
+                    StringBuffer organicList = new StringBuffer();
                     irrigationList.append("IRRTSF=0.,0.,").append(NEW_LINE);
                     fertilizerList.append("UREAP1=0.,0.,").append(NEW_LINE);
+                    organicList.append("OM1DAT=0.,0.,").append(NEW_LINE);
+                    Calendar plant_cal = Calendar.getInstance();
                     for (HashMap<String, Object> event : events) {
                             if ("planting".equals(event.get("event"))) {
                                     crid = (String)event.get("crid");
-                                    //System.out.println(event.get("date"));
-                                    Calendar plant_cal = Calendar.getInstance();                        
+                                    System.out.println(event.get("date"));
                                     plant_cal.setTime(Functions.convertFromAgmipDateString(event.get("date").toString()));
                                     plant_year=String.valueOf(plant_cal.get(Calendar.YEAR));
                                     sowday=String.valueOf(plant_cal.get(Calendar.DAY_OF_YEAR));
@@ -88,11 +90,11 @@ public class ExperimentDataProcessor
                                     sowdep=(String)event.get("pldp");
                            }
                            if ("irrigation".equals(event.get("event"))) {
-                              // System.out.println("irrig"+event.get("date"));
-                              // System.out.println("irrig"+event.get("irval"));
+                               System.out.println("irrig"+event.get("date"));
+                               System.out.println("irrig"+event.get("irval"));
                                Calendar irrg_cal = Calendar.getInstance();                        
                                irrg_cal.setTime(Functions.convertFromAgmipDateString(event.get("date").toString()));
-                               long days_bet=daysBetween(cal,irrg_cal);
+                               long days_bet=daysBetween(plant_cal,irrg_cal);
                             //   System.out.println(days_bet);
                                 irrigationList.append(days_bet-1).append(".,").append(event.get("irval")).append(".,")
                                         .append(days_bet).append(".,").append(event.get("irval")).append(".,")
@@ -105,16 +107,29 @@ public class ExperimentDataProcessor
                                System.out.println("fertilzer"+event.get("fecd"));
                                Calendar fert_cal = Calendar.getInstance();                        
                                fert_cal.setTime(Functions.convertFromAgmipDateString(event.get("date").toString()));
-                               long days_bet1=daysBetween(cal,fert_cal);
+                               long days_bet1=daysBetween(plant_cal,fert_cal);
                                if(event.get("fecd").equals("FE005")){
                                 fertilizerList.append(days_bet1-1).append(".,").append(event.get("feamn")).append(".,")
                                          .append(days_bet1).append(".,").append(event.get("feamn")).append(".,")
                                          .append(days_bet1+1).append(".,").append(event.get("feamn")).append(".,").append(NEW_LINE);
                                }
                            }
+                           if ("organic_matter".equals(event.get("event"))) {
+                               System.out.println("ord"+event.get("date"));
+                               System.out.println("orgamt"+event.get("omamt"));
+                               Calendar fert_cal = Calendar.getInstance();                        
+                               fert_cal.setTime(Functions.convertFromAgmipDateString(event.get("date").toString()));
+                               long days_bet1=daysBetween(plant_cal,fert_cal);
+                              
+                                organicList.append(days_bet1-1).append(".,").append(event.get("omamt")).append(".,")
+                                         .append(days_bet1).append(".,").append(event.get("omamt")).append(".,")
+                                         .append(days_bet1+1).append(".,").append(event.get("omamt")).append(".,").append(NEW_LINE);
+                               
+                           }
                     }
                     irrigationList.append("365.,0.").append(NEW_LINE);
                     fertilizerList.append("365.,0.").append(NEW_LINE);
+                    organicList.append("365.,0.").append(NEW_LINE);
                     System.out.println(fertilizerList);
                     if (crid == null) {
                         crid = getValueOr(result, "crid", "XX");
@@ -211,6 +226,7 @@ public class ExperimentDataProcessor
                         rerunOutput.write("SWCPOT=1."+NEW_LINE);
                     }
                     rerunOutput.write(fertilizerList.toString());
+                    rerunOutput.write(organicList.toString());
                     rerunOutput.close(); 
                     
                     //batch
