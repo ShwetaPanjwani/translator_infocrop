@@ -132,7 +132,7 @@ public class ExperimentDataProcessor
                     organicList.append("365.,0.").append(NEW_LINE);
                     LOG.debug(fertilizerList.toString());
                     if (crid == null) {
-                        crid = getValueOr(result, "crid", "XX");
+                        crid = MapUtil.getValueOr(experiment, "crid", "XX");
                     }  
 
                     crid = LookupCodes.lookupCode("CRID", crid, "INFOCROP");
@@ -433,5 +433,4 @@ public class ExperimentDataProcessor
 	        } 
                     return variety;
         }
-    }
 }
