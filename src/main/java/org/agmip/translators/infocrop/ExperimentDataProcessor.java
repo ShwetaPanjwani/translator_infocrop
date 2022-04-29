@@ -143,7 +143,9 @@ public class ExperimentDataProcessor
                     }  
 
                     crid = LookupCodes.lookupCode("CRID", crid, "INFOCROP");
-                    variety= getVariety(crid,crop_variety);  
+                    if (crid != null && crop_variety!= null) {
+                        variety= getVariety(crid,crop_variety);  
+                    }
                     
                                                                  
                     HashMap<String, Object> soildata=(HashMap<String, Object> )MapUtil.getObjectOr(soilDataMap, MapUtil.getValueOr(experiment, "soil_id", "XX"), "XX");
@@ -311,9 +313,13 @@ public class ExperimentDataProcessor
 	}
         
         protected String getVariety(String crid,String crop_variety) {
-           String variety=""; 
+           String variety="";
+           File vFile = new File(outputDir+"CROP_VARIETY.txt");
+           if (!vFile.exists()) {
+               vFile = new File(getClass().getClassLoader().getResource("CROP_VARIETY.txt").getFile());
+           }
            try {
-                    BufferedReader br = new BufferedReader(new FileReader(outputDir+"CROP_VARIETY.txt"));
+                    BufferedReader br = new BufferedReader(new FileReader(vFile));
                     // Declaring a string variable
                     String st;
                     while ((st = br.readLine()) != null)
