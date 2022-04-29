@@ -52,7 +52,7 @@ public class SoilProcessor {
                 String soilData;
                StringBuffer retval= new StringBuffer();
                SoilData soilDataObj =new SoilData(soil_id);
-              // System.out.println("test");
+              // LOG.debug("test");
 		try {
                                 for(HashMap<String, Object> soilLayer : soilLayers) 
                                 {
@@ -161,7 +161,7 @@ public class SoilProcessor {
                                 if(calculateAverage(Layer3,"sloc")!=-9999.0){
                                     layerData.put("SOC3",String.format("%.2f",calculateAverage(Layer3,"sloc")));
                                 }
-                               // System.out.println("soilid---"+soil_id+"layerData---"+layerData);
+                               // LOG.debug("soilid---"+soil_id+"layerData---"+layerData);
                                 
                                 //output.write(layerData.toString());  
                                 soilDataMap.put(soil_id, layerData);

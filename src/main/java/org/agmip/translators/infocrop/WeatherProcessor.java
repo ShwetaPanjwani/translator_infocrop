@@ -27,16 +27,16 @@ public class WeatherProcessor {
                 this.outputDir = outputDir;
                 
                 
-                //System.out.println("outputDir---"+outputDir);
+                //LOG.debug("outputDir---"+outputDir);
 		ArrayList<HashMap<String, Object>> weathers = (ArrayList<HashMap<String, Object>>) MapUtil.getObjectOr(results, "weathers", new HashMap<String, Object>());
-                //System.out.println("wedathets"+weathers);
+                //LOG.debug("wedathets"+weathers);
                
 		for(HashMap<String, Object> wst : weathers) {                   
                    ArrayList<HashMap<String, Object>> wthRecords = (ArrayList<HashMap<String, Object>>) MapUtil.getObjectOr(wst, "dailyWeather", new ArrayList<HashMap<String, Object>>());
-                //System.out.println("wthRecords"+wthRecords);
+                //LOG.debug("wthRecords"+wthRecords);
                 String startYear = MapUtil.getValueOr((wthRecords.get(0)), "w_date", "    ").substring(0, 4).trim();
                 String endYear = MapUtil.getValueOr((wthRecords.get(wthRecords.size() - 1)), "w_date", "    ").substring(0, 4).trim();
-              //  System.out.println(Integer.valueOf(startYear)+"--"+Integer.valueOf(endYear));
+              //  LOG.debug(Integer.valueOf(startYear)+"--"+Integer.valueOf(endYear));
                     generateWeatherFile(wst,Integer.valueOf(startYear),Integer.valueOf(endYear)); 
                 }
 	}
@@ -49,7 +49,7 @@ public class WeatherProcessor {
 		String lng =  MapUtil.getValueOr(wst, "wst_long", "-99");
 		String elevation =  MapUtil.getValueOr(wst, "wst_elev", "0");
 		String wst_id =  MapUtil.getValueOr(wst, "wst_id", "-99");
-		//System.out.println("wst"+wst_id);
+		//LOG.debug("wst"+wst_id);
 		StringBuffer headerData= new StringBuffer();
                 String fileName ="";
                 headerData.append("*----------------------------------------------------------------*").append("\r\n")
@@ -74,10 +74,10 @@ public class WeatherProcessor {
                 try {
                    for(int i=startYear;i<=endYear;i++)
                    {
-                            //System.out.println(Integer.toString(i));
+                            //LOG.debug(Integer.toString(i));
                             StringBuffer recordData = new StringBuffer(); 
                             fileName = outputDir+wst_id.substring(0,4)+stationIndex+"."+Integer.toString(i).substring(1,4).toString();   
-                           // System.out.println("fileName"+fileName);
+                           // LOG.debug("fileName"+fileName);
                             File file = new File(fileName);
                             BufferedWriter output = new BufferedWriter(new FileWriter(file,true));
                             for(HashMap<String, Object> todaysWeather : dailyWeather) 
@@ -97,7 +97,7 @@ public class WeatherProcessor {
                                        .append(MapUtil.getValueOr(todaysWeather, "rain", "0")).append("\r\n");
                                      }
                             }	
-                           // System.out.println("recordData"+recordData);	
+                           // LOG.debug("recordData"+recordData);	
                             output.write(headerData.toString());
                             output.write(recordData.toString());
                             LOG.debug("Data Record {}", recordData.toString()  );
