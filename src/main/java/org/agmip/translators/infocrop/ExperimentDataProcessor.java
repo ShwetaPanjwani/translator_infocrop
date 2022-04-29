@@ -12,6 +12,7 @@ import org.agmip.util.MapUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.*;
+import java.util.Date;
 import org.apache.commons.io.FileUtils;
 import org.agmip.ace.LookupCodes;
 import java.util.Scanner;
@@ -45,7 +46,10 @@ public class ExperimentDataProcessor
                 {             
                     irrig=MapUtil.getValueOr(experiment, "IRRIG", "XX");
                     Calendar cal = Calendar.getInstance();                        
-                    cal.setTime(Functions.convertFromAgmipDateString(MapUtil.getValueOr(experiment, "sdat", "XX"))); //timer.dat
+                    Date sdat = Functions.convertFromAgmipDateString(MapUtil.getValueOr(experiment, "sdat", "XX"));
+                    if (sdat != null) {
+                        cal.setTime(sdat); //timer.dat
+                    }
                     InputStream inputStream = classLoader.getResourceAsStream("timer.dat");
                     InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
                     BufferedReader reader = new BufferedReader(streamReader);
@@ -88,7 +92,10 @@ public class ExperimentDataProcessor
                                     crop_variety=(String)event.get("infocrop_cul_id");
                                     crid = (String)event.get("crid");
                                     sowdep=(String)event.get("pldp");
+                                    break;
                            }
+                    }
+                    for (HashMap<String, Object> event : events) {
                            if ("irrigation".equals(event.get("event"))) {
                                LOG.debug("irrig"+event.get("date"));
                                LOG.debug("irrig"+event.get("irval"));
@@ -108,7 +115,7 @@ public class ExperimentDataProcessor
                                Calendar fert_cal = Calendar.getInstance();                        
                                fert_cal.setTime(Functions.convertFromAgmipDateString(event.get("date").toString()));
                                long days_bet1=daysBetween(plant_cal,fert_cal);
-                               if(event.get("fecd").equals("FE005")){
+                               if("FE005".equals(event.get("fecd"))){
                                 fertilizerList.append(days_bet1-1).append(".,").append(event.get("feamn")).append(".,")
                                          .append(days_bet1).append(".,").append(event.get("feamn")).append(".,")
                                          .append(days_bet1+1).append(".,").append(event.get("feamn")).append(".,").append(NEW_LINE);

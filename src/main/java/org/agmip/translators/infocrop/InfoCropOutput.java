@@ -16,6 +16,10 @@ public class InfoCropOutput implements TranslatorOutput {
             long start = System.currentTimeMillis();	
             HashMap<String, Object> results = (HashMap<String, Object> )input;
             //CleanDirectory(filePath);
+            File f = new File(filePath);
+            if (!f.exists()) {
+                f.mkdirs();
+            }
             (new WeatherProcessor()).ProcessWeatherData(filePath,results);
             HashMap<String, Object> soilDataMap = (HashMap<String, Object>)(new SoilProcessor()).ProcessSoilData(filePath,results);
             log.debug("soilDataMap"+soilDataMap);

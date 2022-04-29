@@ -59,16 +59,16 @@ public class SoilProcessor {
                                         counter++;
                                         PHSum+=Double.valueOf(MapUtil.getValueOr(soilLayer, "slphw", "-9999"));
                                         ECSum+=Double.valueOf(MapUtil.getValueOr(soilLayer, "slec", "-9999"));
-                                        if (Integer.valueOf(MapUtil.getValueOr(soilLayer, "sllb", "-9999"))<=30)
+                                        if (Double.valueOf(MapUtil.getValueOr(soilLayer, "sllb", "-9999"))<=30)
                                         {
                                              Layer1.add(soilLayer);
                                         }
-                                        if (Integer.valueOf(MapUtil.getValueOr(soilLayer, "sllb", "-9999"))>30 && Integer.valueOf(MapUtil.getValueOr(soilLayer, "sllb", "-9999"))<=60)
+                                        if (Double.valueOf(MapUtil.getValueOr(soilLayer, "sllb", "-9999"))>30 && Double.valueOf(MapUtil.getValueOr(soilLayer, "sllb", "-9999"))<=60)
                                         {
                                              Layer2.add(soilLayer);
                                         }
 
-                                        if (Integer.valueOf(MapUtil.getValueOr(soilLayer, "sllb", "-9999"))>60 && Integer.valueOf(MapUtil.getValueOr(soilLayer, "sllb", "-9999"))<=150)
+                                        if (Double.valueOf(MapUtil.getValueOr(soilLayer, "sllb", "-9999"))>60 && Double.valueOf(MapUtil.getValueOr(soilLayer, "sllb", "-9999"))<=150)
                                         {
                                              Layer3.add(soilLayer);
                                         }
