@@ -12,6 +12,7 @@ import org.agmip.util.MapUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.*;
+import java.util.Date;
 import org.apache.commons.io.FileUtils;
 import org.agmip.ace.LookupCodes;
 import java.util.Scanner;
@@ -38,23 +39,26 @@ public class ExperimentDataProcessor
                 
                 ArrayList<HashMap<String, Object>> experiments = (ArrayList<HashMap<String, Object>>) MapUtil.getObjectOr(results, "experiments", new HashMap<String, Object>());
                 
-                System.out.println("outputDir"+outputDir);
-                System.out.println("experiments"+experiments);
+                LOG.debug("outputDir"+outputDir);
+                LOG.debug("experiments"+experiments);
                 ClassLoader classLoader = getClass().getClassLoader();
 		for(HashMap<String, Object> experiment : experiments) 
                 {             
                     irrig=MapUtil.getValueOr(experiment, "IRRIG", "XX");
                     Calendar cal = Calendar.getInstance();                        
-                    cal.setTime(Functions.convertFromAgmipDateString(MapUtil.getValueOr(experiment, "sdat", "XX"))); //timer.dat
+                    Date sdat = Functions.convertFromAgmipDateString(MapUtil.getValueOr(experiment, "sdat", "XX"));
+                    if (sdat != null) {
+                        cal.setTime(sdat); //timer.dat
+                    }
                     InputStream inputStream = classLoader.getResourceAsStream("timer.dat");
                     InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
                     BufferedReader reader = new BufferedReader(streamReader);
                     BufferedWriter output = new BufferedWriter(new FileWriter(outputDir+"timer_"+MapUtil.getValueOr(experiment, "exname", "XX")+".dat",true));         
-                    System.out.println("experiment"+MapUtil.getValueOr(experiment, "exname", "XX"));
+                    LOG.debug("experiment"+MapUtil.getValueOr(experiment, "exname", "XX"));
                     String line;
                     while ((line = reader.readLine()) != null) 
                     {
-                        //System.out.println(line);
+                        //LOG.debug(line);
                         if(line.startsWith("WTRDIR"))
                         {
                            line="WTRDIR = '"+outputDir+"'";
@@ -81,42 +85,45 @@ public class ExperimentDataProcessor
                     for (HashMap<String, Object> event : events) {
                             if ("planting".equals(event.get("event"))) {
                                     crid = (String)event.get("crid");
-                                    System.out.println(event.get("date"));
+                                    LOG.debug(event.get("date").toString());
                                     plant_cal.setTime(Functions.convertFromAgmipDateString(event.get("date").toString()));
                                     plant_year=String.valueOf(plant_cal.get(Calendar.YEAR));
                                     sowday=String.valueOf(plant_cal.get(Calendar.DAY_OF_YEAR));
                                     crop_variety=(String)event.get("infocrop_cul_id");
                                     crid = (String)event.get("crid");
                                     sowdep=(String)event.get("pldp");
+                                    break;
                            }
+                    }
+                    for (HashMap<String, Object> event : events) {
                            if ("irrigation".equals(event.get("event"))) {
-                               System.out.println("irrig"+event.get("date"));
-                               System.out.println("irrig"+event.get("irval"));
+                               LOG.debug("irrig"+event.get("date"));
+                               LOG.debug("irrig"+event.get("irval"));
                                Calendar irrg_cal = Calendar.getInstance();                        
                                irrg_cal.setTime(Functions.convertFromAgmipDateString(event.get("date").toString()));
                                long days_bet=daysBetween(plant_cal,irrg_cal);
-                            //   System.out.println(days_bet);
+                            //   LOG.debug(days_bet);
                                 irrigationList.append(days_bet-1).append(".,").append(event.get("irval")).append(".,")
                                         .append(days_bet).append(".,").append(event.get("irval")).append(".,")
                                         .append(days_bet+1).append(".,").append(event.get("irval")).append(".,").append(NEW_LINE);
                                
                            }
                            if ("fertilizer".equals(event.get("event"))) {
-                               System.out.println("fertilzer"+event.get("date"));
-                               System.out.println("fertilzer"+event.get("feamn"));
-                               System.out.println("fertilzer"+event.get("fecd"));
+                               LOG.debug("fertilzer"+event.get("date"));
+                               LOG.debug("fertilzer"+event.get("feamn"));
+                               LOG.debug("fertilzer"+event.get("fecd"));
                                Calendar fert_cal = Calendar.getInstance();                        
                                fert_cal.setTime(Functions.convertFromAgmipDateString(event.get("date").toString()));
                                long days_bet1=daysBetween(plant_cal,fert_cal);
-                               if(event.get("fecd").equals("FE005")){
+                               if("FE005".equals(event.get("fecd"))){
                                 fertilizerList.append(days_bet1-1).append(".,").append(event.get("feamn")).append(".,")
                                          .append(days_bet1).append(".,").append(event.get("feamn")).append(".,")
                                          .append(days_bet1+1).append(".,").append(event.get("feamn")).append(".,").append(NEW_LINE);
                                }
                            }
                            if ("organic_matter".equals(event.get("event"))) {
-                               System.out.println("ord"+event.get("date"));
-                               System.out.println("orgamt"+event.get("omamt"));
+                               LOG.debug("ord"+event.get("date"));
+                               LOG.debug("orgamt"+event.get("omamt"));
                                Calendar fert_cal = Calendar.getInstance();                        
                                fert_cal.setTime(Functions.convertFromAgmipDateString(event.get("date").toString()));
                                long days_bet1=daysBetween(plant_cal,fert_cal);
@@ -130,13 +137,15 @@ public class ExperimentDataProcessor
                     irrigationList.append("365.,0.").append(NEW_LINE);
                     fertilizerList.append("365.,0.").append(NEW_LINE);
                     organicList.append("365.,0.").append(NEW_LINE);
-                    System.out.println(fertilizerList);
+                    LOG.debug(fertilizerList.toString());
                     if (crid == null) {
-                        crid = getValueOr(result, "crid", "XX");
+                        crid = MapUtil.getValueOr(experiment, "crid", "XX");
                     }  
 
                     crid = LookupCodes.lookupCode("CRID", crid, "INFOCROP");
-                    variety= getVariety(crid,crop_variety);  
+                    if (crid != null && crop_variety!= null) {
+                        variety= getVariety(crid,crop_variety);  
+                    }
                     
                                                                  
                     HashMap<String, Object> soildata=(HashMap<String, Object> )MapUtil.getObjectOr(soilDataMap, MapUtil.getValueOr(experiment, "soil_id", "XX"), "XX");
@@ -207,7 +216,7 @@ public class ExperimentDataProcessor
                         }else if(line.startsWith("SOC3") && soildata.get("SOC3")!=null){
                            line="SOC3 = "+soildata.get("SOC3");
                         }
-                        //System.out.println(line); 
+                        //LOG.debug(line); 
                         output1.write(line+NEW_LINE);
                     } 
                     output1.close();
@@ -304,15 +313,19 @@ public class ExperimentDataProcessor
 	}
         
         protected String getVariety(String crid,String crop_variety) {
-           String variety=""; 
+           String variety="";
+           File vFile = new File(outputDir+"CROP_VARIETY.txt");
+           if (!vFile.exists()) {
+               vFile = new File(getClass().getClassLoader().getResource("CROP_VARIETY.txt").getFile());
+           }
            try {
-                    BufferedReader br = new BufferedReader(new FileReader(outputDir+"CROP_VARIETY.txt"));
+                    BufferedReader br = new BufferedReader(new FileReader(vFile));
                     // Declaring a string variable
                     String st;
                     while ((st = br.readLine()) != null)
                     {
                        String[] st1=st.split(",");// Print the string
-                       //System.out.println(st1[1].toUpperCase()+"_"+arr[2].toUpperCase());
+                       //LOG.debug(st1[1].toUpperCase()+"_"+arr[2].toUpperCase());
                        if(st1[0].toUpperCase().equals(crid.toUpperCase()) && st1[1].toUpperCase().equals(crop_variety.toUpperCase()))
                        {
                             
@@ -433,5 +446,4 @@ public class ExperimentDataProcessor
 	        } 
                     return variety;
         }
-    }
 }

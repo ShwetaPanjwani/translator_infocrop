@@ -16,15 +16,19 @@ public class InfoCropOutput implements TranslatorOutput {
             long start = System.currentTimeMillis();	
             HashMap<String, Object> results = (HashMap<String, Object> )input;
             //CleanDirectory(filePath);
+            File f = new File(filePath);
+            if (!f.exists()) {
+                f.mkdirs();
+            }
             (new WeatherProcessor()).ProcessWeatherData(filePath,results);
             HashMap<String, Object> soilDataMap = (HashMap<String, Object>)(new SoilProcessor()).ProcessSoilData(filePath,results);
-            System.out.println("soilDataMap"+soilDataMap);
+            log.debug("soilDataMap"+soilDataMap);
             (new ExperimentDataProcessor()).ProcessExperimentData(filePath,results,soilDataMap);
             long end = System.currentTimeMillis();
             log.info("Process Completed Exec Time: {} secs",  ((end-start)/1000) );
     	} catch (Exception ex) {
     		log.error(ex.toString());
-    		ex.printStackTrace();
+    		ex.printStackTrace(System.err);
     	}
     }
     

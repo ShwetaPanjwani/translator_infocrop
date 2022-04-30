@@ -13,7 +13,7 @@ public class SoilData {
 
 	public SoilData(String globalData)
 	{
-		//System.out.println("test");
+		//LOG.debug("test");
                 layerData = new ArrayList<String>();                
 		this.soilGlobalData = globalData;
 	}
